@@ -1,40 +1,40 @@
 import os
-import time
 import threading
-from .job_status_store import save_status, load_status, save_queues, load_queues
+from .job_db import update_status, get_job_status
 from .queues import queues
 from .config import JOB_FOLDER, RESULT_FOLDER
 from datetime import datetime
 import subprocess
 
-job_status = load_status()
-job_queues = load_queues()
+# job_status = load_status()
+# job_queues = load_queues()
 def process_job(job):
-    print(f"Processing job: {job}")
+    print(f"{datetime.now()} - Processing job: {job['job_id']}")
     job_id = job["job_id"]
     script_path = job["script_path"]
-    software = job["software"]
-    output_path = os.path.join(JOB_FOLDER, software, job_id, "log.txt")
-
-    # Define job-specific result folder
-    result_dir = os.path.join(RESULT_FOLDER, software, job_id)
-    os.makedirs(result_dir, exist_ok=True)
-
-    # Update job status
-    job_status[job_id] = "running"
-    save_status(job_status)
-    save_queues(job_queues)
+    queue_name = job["queue_name"]
+    output_path = os.path.join(JOB_FOLDER, queue_name, job_id, "log.txt")
 
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
+    # Define job-specific result folder
+    result_dir = os.path.join(RESULT_FOLDER, queue_name, job_id)
+    os.makedirs(result_dir, exist_ok=True)
+
+
+
+    # Update job status
+    update_status(job_id, "running")
+
+    
+
     try:
         with open(output_path, "w") as f:
-            f.write(f"[{datetime.now()}] Started job {job_id} for {software}\n")
+            f.write(f"[{datetime.now()}] Started job {job_id} for {queue_name}\n")
             f.write(f"[{datetime.now()}] Running script: {script_path}\n")
             f.flush()
 
-            # Simulated job run: sleep for 5 seconds
-            # Replace this with actual execution logic if needed
+            # Run job script
             if script_path.endswith(".py"):
                 result = subprocess.run(
                     ["python", script_path],
@@ -46,33 +46,36 @@ def process_job(job):
                 f.write(result.stdout)
                 if result.stderr:
                     f.write(f"\n[stderr]\n{result.stderr}")
+                    f.write(f"\n[{datetime.now()}] Error in job {job_id}\n")
+                    update_status(job_id, "failed")
+                else:
+                    f.write(f"\n[{datetime.now()}] Completed job {job_id}\n")
+                    update_status(job_id, "completed")
             else:
-                f.write("Unknown script type. Skipping execution.\n")
+                f.write(f"\n[{datetime.now()}] Unknown script type for job {job_id}. Skipping execution\n")
+                update_status(job_id, "failed")
 
-            f.write(f"\n[{datetime.now()}] Completed job {job_id}\n")
-
-        job_status[job_id] = "completed"
-        save_status(job_status)
 
     except Exception as e:
         with open(output_path, "a") as f:
             f.write(f"\n[{datetime.now()}] Job failed: {str(e)}\n")
-        job_status[job_id] = "failed"
-        save_status(job_status)
+        update_status(job_id, "failed")
 
-def run_queue_loop(software):
-    print(f"Starting queue loop for {software}")
-    # job_status[job["job_id"]] = "queued"
-    q = queues[software]
+    status = get_job_status(job_id)['status'].values[0]
+    print(f"{datetime.now()} - Finished job: {job['job_id']} - Status: {status}")
+
+def run_queue_loop(queue_name):
+    print(f"Starting queue loop for {queue_name}")
+    q = queues[queue_name]
     while True:
         job = q.get()
         process_job(job)
         q.task_done()
 
 def start_queue_loops():
-    for software in queues:
-        t = threading.Thread(target=run_queue_loop, args=(software,), daemon=True)
+    for queue_name in queues:
+        t = threading.Thread(target=run_queue_loop, args=(queue_name,), daemon=True)
         t.start()
 
-def get_status():
-    return job_status
+# def get_status():
+#     return job_status
