@@ -1,5 +1,4 @@
 import requests
-import json
 import os
 import getpass
 import pandas as pd
