@@ -3,10 +3,10 @@ import json
 import os
 import getpass
 import pandas as pd
+from client_config import IP, PORT
 
 USER_ID = getpass.getuser()
-IP = "127.0.0.1"
-PORT = 5000
+
 SERVER_URL = f"http://{IP}:{PORT}"
 # HISTORY_FILE = "client_job_history.json"
 
