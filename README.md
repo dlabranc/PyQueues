@@ -2,13 +2,9 @@ This is a simple module for scheduling tasks in queues from python scripts.
 # Installation 
 Install this package on both the server and client. Note: the server environment in which you will run this server must have all the client's codes required packages installed.
 Clone the repository.
-'
-git clone 
-'
+'git clone'
 Install the package.
-'
-pip install -e .
-'
+'pip install -e .'
 # Server end
 First set the BASE_DIR path in "config.py". This sets the folder on the remote machine in which all the scripts results and logs will be stored.
 '
