@@ -15,7 +15,7 @@ pip install -e .
 # Server end
 First set the BASE_DIR path in "config.py". This sets the folder on the remote machine in which all the scripts results and logs will be stored.
 ```
-BASE_DIR = "\\BASEDIR\\"
+BASE_DIR = "\\PATH\\TO\BASEDIR\\"
 ```
 In the same file you can define different queues for your scheduler as a list. Each queue will be handeled in parallel.
 ```
@@ -23,10 +23,16 @@ SOFTWARE_QUEUES = ["ansys", "palace"]
 ```
 You can now start the server:
 ```
-jobqueue-server
+jq-server
 ```
 # Client end
 The client only needs to know the IP and port where the server is running and set that in the client_config.py file.
+
+The client can run the GUI as:
+```
+jq-gui
+```
+This will show the job database and can be used to send single jobs to the server.
 
 1. Set the IP and PORT of the server in client_config.py
    ```
@@ -50,5 +56,6 @@ The client only needs to know the IP and port where the server is running and se
    download_job_log(JOB_ID)
    download_job_results(JOB_ID)
    ```
+
    
    
