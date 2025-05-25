@@ -2,7 +2,7 @@ import requests
 import os
 import getpass
 import pandas as pd
-from client_config import IP, PORT
+from .client_config import IP, PORT
 
 USER_ID = getpass.getuser()
 

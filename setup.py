@@ -8,7 +8,8 @@ setup(
     install_requires=["flask", "pandas"],
     entry_points={
         'console_scripts': [
-        'jobqueue-server=jobqueue_server.__main__:run',
+        'jq-server=jobqueue_server.__main__:run',
+        'jq-gui = jobqueue_server.gui:run_gui'
         ]
     },
 )
