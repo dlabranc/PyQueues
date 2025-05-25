@@ -144,7 +144,7 @@ def run_gui():
             df = df[df['status'] == status_filer]
         if queue_filter != "all":
             df = df[df['queue_name'] == queue_filter]
-            
+
         # Clear old columns and rows
         table.delete(*table.get_children())
         table["columns"] = columns
@@ -162,8 +162,10 @@ def run_gui():
             status = row["status"]
             table.insert("", "end", values=list(row), tags=(status,))
 
-    start_df = get_all_jobs()
-    
+    try:
+        start_df = get_all_jobs()
+    except:
+        start_df = pd.DataFrame(columns=['job_id', 'user_id', 'status', 'queue_name', 'created_at', 'updated_at'])
     # === Treeview (DataFrame display) ===
     table_frame = tk.Frame(root)
     table_frame.grid(row=11, column=0, columnspan=3, sticky="nsew", padx=10, pady=10)
@@ -224,9 +226,10 @@ def run_gui():
     # === Refresh Button ===
     refresh_button = tk.Button(root, text="Refresh Jobs", command=update_table)
     refresh_button.grid(row=12, column=0, columnspan=3, pady=(0, 20))
-
-    update_table()
-
+    try:
+        update_table()
+    except:
+        print("Error loading initial job data. Please ensure the server is running or check the right IP and PORT are set in user_config.py")
     root.mainloop()
 
 if __name__ == "__main__":
