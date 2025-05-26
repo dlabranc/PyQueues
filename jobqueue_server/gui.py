@@ -36,7 +36,7 @@ def run_gui():
             if not script.endswith('.py'):
                 output_label.config(text=f"Error: {script} is not a Python script.")
                 continue
-            submit_job(script, queue_name, additional_files, user_id=user)
+            submit_job(script, queue_name, additional_files, user_id=user, server_url=f"http://{ip}:{port}")
             time.sleep(0.1)  # Small delay to ensure the job is processed
             
         # Update the job status table
@@ -170,7 +170,7 @@ def run_gui():
     def update_table():
         
         # Example DataFrame (replace this with yours)
-        df = get_all_jobs()
+        df = get_all_jobs(server_url=f"http://{ip_entry.get()}:{port_entry.get()}")
         df = df[columns].sort_values(by='created_at', ascending=False)  # Ensure df has the correct columns
 
         # Filter DataFrame based on user input
@@ -203,7 +203,7 @@ def run_gui():
             table.insert("", "end", values=list(row), tags=(status,))
 
     try:
-        start_df = get_all_jobs()
+        start_df = get_all_jobs(server_url=f"http://{ip_entry.get()}:{port_entry.get()}")
     except:
         start_df = pd.DataFrame(columns=['job_id', 'user_id', 'status', 'queue_name', 'created_at', 'updated_at'])
     # === Treeview (DataFrame display) ===
@@ -301,7 +301,7 @@ def run_gui():
             row = table.item(item_id)["values"]
             job_id = row[0]  # adjust index to match JobID column
             filename = f"{folder}/{job_id}_log.txt"
-            download_job_log(job_id, save_as=filename)
+            download_job_log(job_id, save_as=filename, server_url=f"http://{ip_entry.get()}:{port_entry.get()}")
             if row[2] != "completed":
                 print(f"Job {job_id} is not completed. Skipping download.")
                 continue
