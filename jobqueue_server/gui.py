@@ -19,6 +19,7 @@ def run_gui():
         port = port_entry.get()
         user = user_entry.get()
         queue_name = dropdown_var.get()
+        
 
         if not ip or not port or not user:
             output_label.config(text="Error: IP, Port, and User fields cannot be empty.")
@@ -309,10 +310,17 @@ def run_gui():
             download_job_results(job_id, save_as=filename)
 
         print(f"Downloaded {count}/{len(selected_items)} jobs to {folder}")
+        dw_output_label.config(text=f"Downloaded {count}/{len(selected_items)} jobs to {folder}")
+
         
     tk.Label(download_frame, text="Select Job(s) from above and Download Results").grid(row=0, column=1, sticky="w", padx=5, pady=5)
     download_button = tk.Button(download_frame, text="Download Results", command=download_selected_jobs, width=20)
     download_button.grid(row=1, column=1,  padx=5, pady=5, sticky="w")
+
+    dw_output_label = tk.Label(download_frame, text="")
+    dw_output_label.grid(row=2, column=1, sticky="w", padx=5, pady=5)
+
+    
 
     tk.Label(download_frame, text="Download Folder:").grid(row=0, column=0, sticky="w", padx=5, pady=5)
     work_folder_var = tk.StringVar()

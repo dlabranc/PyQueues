@@ -1,6 +1,6 @@
 */__pycache__/
 *.egg-info
-env_scheduler/
+env-scheduler/
 build/
 results/*
 jobs/*
