@@ -5,10 +5,12 @@ from .config import SOFTWARE_QUEUES
 from .client_config import IP, PORT
 from .client import *
 import pandas as pd
+import time
 
 USER_ID = getpass.getuser()
 
-def your_function(ip, port, user, queue_name):
+def submission_and_update(ip, port, user, queue_name):
+
     return f"Submitted job to {ip}:{port} as {user} in queue {queue_name}"
 
 def run_gui():
@@ -16,13 +18,39 @@ def run_gui():
         ip = ip_entry.get()
         port = port_entry.get()
         user = user_entry.get()
-        selection = dropdown_var.get()
-        result = your_function(ip, port, user, selection)
+        queue_name = dropdown_var.get()
+
+        if not ip or not port or not user:
+            output_label.config(text="Error: IP, Port, and User fields cannot be empty.")
+            return
+        if not queue_name:
+            output_label.config(text="Error: Queue field cannot be empty.")
+            return
+        
+        if not script_paths:
+            output_label.config(text="Error: No scripts selected.")
+            return
+
+        for script in script_paths:
+            if not script.endswith('.py'):
+                output_label.config(text=f"Error: {script} is not a Python script.")
+                continue
+            submit_job(script, queue_name, additional_files, user_id=user)
+            time.sleep(0.1)  # Small delay to ensure the job is processed
+            
+        # Update the job status table
+        try:
+            update_table()
+        except Exception as e:
+            output_label.config(text=f"Error updating job table: {e}")
+            return
+
+        result = f"Submitted job to {ip}:{port} as {user} in queue {queue_name}"
         output_label.config(text=f"{result}")
 
     root = tk.Tk()
     root.title("Jobs Queue Server GUI")
-    root.geometry("1000x700")
+    root.geometry("1400x750+0+0")
 
     # === Layout configuration ===
     # Ensure the grid rows and columns expand properly
@@ -31,43 +59,49 @@ def run_gui():
 
 
     # === LEFT COLUMN: Configuration Inputs (clean, uniform vertical spacing) ===
-    form_pady = (5,0)  # uniform vertical space
+    form_pady = (10,10)  # uniform vertical space
+
+    # === Frame for left-side inputs ===
+    left_frame = tk.Frame(root)
+    left_frame.grid(row=0, column=0, rowspan=5, sticky="nsew", padx=10, pady=10)
+    left_frame.columnconfigure(0, weight=1)  # Make the left column expand
+    left_frame.rowconfigure(0, weight=1)  # Make the left row expand
 
     # IP
-    tk.Label(root, text="IP:").grid(row=1, column=0, sticky="w", padx=20, pady=form_pady)
-    ip_entry = tk.Entry(root)
+    tk.Label(left_frame, text="IP:").grid(row=0, column=0, sticky="w", padx=20, pady=form_pady)
+    ip_entry = tk.Entry(left_frame)
     ip_entry.insert(0, IP)
-    ip_entry.grid(row=1, column=0, sticky="e", padx=100, pady=form_pady)
+    ip_entry.grid(row=0, column=0, sticky="e", padx=100, pady=form_pady)
 
     # Port
-    tk.Label(root, text="Port:").grid(row=2, column=0, sticky="w", padx=20, pady=form_pady)
-    port_entry = tk.Entry(root)
+    tk.Label(left_frame, text="Port:").grid(row=1, column=0, sticky="w", padx=20, pady=form_pady)
+    port_entry = tk.Entry(left_frame)
     port_entry.insert(0, PORT)
-    port_entry.grid(row=2, column=0, sticky="e", padx=100, pady=form_pady)
+    port_entry.grid(row=1, column=0, sticky="e", padx=100, pady=form_pady)
 
     # User
-    tk.Label(root, text="User:").grid(row=3, column=0, sticky="w", padx=20, pady=form_pady)
-    user_entry = tk.Entry(root)
+    tk.Label(left_frame, text="User:").grid(row=2, column=0, sticky="w", padx=20, pady=form_pady)
+    user_entry = tk.Entry(left_frame)
     user_entry.insert(0, USER_ID)
-    user_entry.grid(row=3, column=0, sticky="e", padx=100, pady=form_pady)
+    user_entry.grid(row=2, column=0, sticky="e", padx=100, pady=form_pady)
 
     # Queue
-    tk.Label(root, text="Queue:").grid(row=4, column=0, sticky="w", padx=20, pady=form_pady)
+    tk.Label(left_frame, text="Queue:").grid(row=3, column=0, sticky="w", padx=20, pady=form_pady)
     dropdown_var = tk.StringVar(value=SOFTWARE_QUEUES[0])
-    dropdown = ttk.Combobox(root, textvariable=dropdown_var, width=17)
+    dropdown = ttk.Combobox(left_frame, textvariable=dropdown_var, width=17)
     dropdown['values'] = SOFTWARE_QUEUES
-    dropdown.grid(row=4, column=0, sticky="e", padx=100, pady=form_pady)
+    dropdown.grid(row=3, column=0, sticky="e", padx=100, pady=form_pady)
 
     # === RIGHT COLUMN: File Selection & List ===
 
     # === Variables to hold paths ===
-    script_path = None
+    script_paths = []
     additional_files = []
 
     # === Right-side Text Area with Scrollbars ===
     # === Frame to hold Text + Scrollbars ===
-    text_frame = tk.Frame(root, width=60, height=20)
-    text_frame.grid(row=1, column=1, rowspan=4, sticky="nsew", padx=(10, 0), pady=(5, 0))
+    text_frame = tk.Frame(root, width=60, height=40)
+    text_frame.grid(row=1, column=1, rowspan=10, columnspan=2, sticky="nsew", padx=(10, 0), pady=(5, 0))
     text_frame.grid_propagate(False)    
     text_frame.config(width=800, height=200)
     text_frame.columnconfigure(0, weight=1)
@@ -93,16 +127,20 @@ def run_gui():
     # === Functions ===
     def update_display():
         file_display.delete("1.0", tk.END) 
-        if script_path:
-            file_display.insert(tk.END, f"[SCRIPT] {script_path}\n", "script")
+        for script in script_paths:
+            file_display.insert("end", f"[SCRIPT] {script}\n", "script")
         for f in additional_files:
             file_display.insert(tk.END, f"[SUPPORT FILE] {f}\n")
+        file_display.tag_configure("script", foreground="red")
 
-    def select_script():
-        nonlocal script_path
-        path = filedialog.askopenfilename(title="Select script", filetypes=[("Python files", "*.py"), ("All files", "*.*")])
-        if path:
-            script_path = path
+    def select_scripts():
+        nonlocal script_paths
+        files = filedialog.askopenfilenames(
+            title="Select scripts",
+            filetypes=[("Python files", "*.py"), ("All files", "*.*")]
+        )
+        if files:
+            script_paths = list(files)
             update_display()
 
     def select_files():
@@ -111,15 +149,16 @@ def run_gui():
         additional_files = files
         update_display()
 
+
     # === Buttons ===
-    tk.Button(root, text="Select Script", command=select_script).grid(row=0, column=1, sticky="w", padx=10, pady=5)
+    tk.Button(root, text="Select Scripts", command=select_scripts).grid(row=0, column=1, sticky="w", padx=10, pady=5)
     tk.Button(root, text="Select Additional Files", command=select_files).grid(row=0, column=1, sticky="w", padx=100, pady=5)
 
 
     # === RUN Button and Output ===
-    tk.Button(root, text="Run", command=process_inputs, width=40, height=3).grid(row=6, column=0, columnspan=2, pady=20)
-    output_label = tk.Label(root, text="", wraplength=800, justify="left")
-    output_label.grid(row=7, column=0, columnspan=2, pady=0, padx=10, sticky="")
+    tk.Button(text_frame, text="Run Job(s)", command=process_inputs, width=40, height=1).grid(row=10, column=0, columnspan=2, pady=7)
+    output_label = tk.Label(text_frame, text="", wraplength=800, justify="left")
+    output_label.grid(row=11, column=0, columnspan=3, pady=(5, 20), padx=10, sticky="")
 
     ######################
     # Job Status Section #
@@ -131,7 +170,7 @@ def run_gui():
         
         # Example DataFrame (replace this with yours)
         df = get_all_jobs()
-        df = df[columns]  # Ensure df has the correct columns
+        df = df[columns].sort_values(by='created_at', ascending=False)  # Ensure df has the correct columns
 
         # Filter DataFrame based on user input
         user_filter = user_var.get()
@@ -210,11 +249,11 @@ def run_gui():
         else:
             table.column(col, width=80, anchor="center")
     
-    table.grid(row=2, column=0, columnspan=4, sticky="nsew", pady=(40, 0))
+    table.grid(row=1, column=0, columnspan=4, sticky="nsew", pady=(40, 0))
 
     # Scrollbars
     scroll_y = ttk.Scrollbar(table_frame, orient="vertical", command=table.yview,)
-    scroll_y.grid(row=2, column=4, sticky="ns", pady=(40, 0))
+    scroll_y.grid(row=1, column=4, sticky="ns", pady=(40, 0))
     table.config(yscrollcommand=scroll_y.set)
 
     scroll_x = ttk.Scrollbar(table_frame, orient="horizontal", command=table.xview)
@@ -224,12 +263,79 @@ def run_gui():
 
 
     # === Refresh Button ===
-    refresh_button = tk.Button(root, text="Refresh Jobs", command=update_table)
-    refresh_button.grid(row=12, column=0, columnspan=3, pady=(0, 20))
+    refresh_button = tk.Button(table_frame, text="Refresh Jobs", command=update_table)
+    refresh_button.grid(row=0, column=3, pady=(5, 2))
     try:
         update_table()
     except:
         print("Error loading initial job data. Please ensure the server is running or check the right IP and PORT are set in user_config.py")
+
+    ############
+    # Download #
+    ############
+
+    download_frame = tk.Frame(root, width=1000, height=100)
+    download_frame.grid(row=12, column=0, columnspan=2, sticky="nsew", padx=10, pady=(0, 0))
+    download_frame.columnconfigure(0, weight=1)
+    download_frame.rowconfigure(0, weight=1)
+    download_frame.rowconfigure(1, weight=1)
+    download_frame.rowconfigure(2, weight=1)
+    download_frame.grid_propagate(False)  # Prevent frame from resizing to fit content
+
+    def download_selected_jobs():
+        selected_items = table.selection()
+        if not selected_items:
+            print("No jobs selected.")
+            return
+
+        # Ask for folder to save results
+        folder = work_folder_var.get()
+        if not folder:
+            folder = filedialog.askdirectory(title="Select Download Folder")
+            if not folder:
+                return  # user canceled
+
+        count = 0
+        for item_id in selected_items:
+            row = table.item(item_id)["values"]
+            job_id = row[0]  # adjust index to match JobID column
+            filename = f"{folder}/{job_id}_log.txt"
+            download_job_log(job_id, save_as=filename)
+            if row[2] != "completed":
+                print(f"Job {job_id} is not completed. Skipping download.")
+                continue
+            count += 1
+            filename = f"{folder}/{job_id}_results.zip"
+            download_job_results(job_id, save_as=filename)
+
+        print(f"Downloaded {count}/{len(selected_items)} jobs to {folder}")
+        
+    tk.Label(download_frame, text="Select Job(s) from above and Download Results").grid(row=0, column=1, sticky="w", padx=5, pady=5)
+    download_button = tk.Button(download_frame, text="Download Results", command=download_selected_jobs, width=20)
+    download_button.grid(row=1, column=1,  padx=5, pady=5, sticky="w")
+
+    tk.Label(download_frame, text="Download Folder:").grid(row=0, column=0, sticky="w", padx=5, pady=5)
+    work_folder_var = tk.StringVar()
+    work_folder_entry = tk.Entry(download_frame, textvariable=work_folder_var, width=80)
+    work_folder_entry.grid(row=0, column=0, sticky="w", padx=110, pady=5)
+
+    def browse_work_folder():
+        folder = filedialog.askdirectory(title="Select Download Folder")
+        if folder:
+            work_folder_var.set(folder)
+
+    browse_button = tk.Button(download_frame, text="Browse", command=browse_work_folder, width=20)
+    browse_button.grid(row=1, column=0, padx=110, pady=5, sticky="w")
+
+    # def periodic_update():
+    #     try:
+    #         update_table()
+    #     except Exception as e:
+    #         print(f"Error updating table: {e}")
+    #     root.after(2000, periodic_update)
+
+    # root.after(2000, periodic_update)
+
     root.mainloop()
 
 if __name__ == "__main__":

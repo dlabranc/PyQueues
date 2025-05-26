@@ -1,7 +1,7 @@
 import time
 print('Ciao sono il tuo script Python')
 
-time.sleep(5)
+time.sleep(10)
 with open('resource0.txt', 'r') as f:
     lines = f.readlines()
     for line in lines:
