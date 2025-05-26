@@ -313,12 +313,12 @@ def run_gui():
         dw_output_label.config(text=f"Downloaded {count}/{len(selected_items)} jobs to {folder}")
 
         
-    tk.Label(download_frame, text="Select Job(s) from above and Download Results").grid(row=0, column=1, sticky="w", padx=5, pady=5)
+    tk.Label(download_frame, text="Select Job(s) from above and Download Results").grid(row=0, column=1, sticky="", padx=5, pady=5)
     download_button = tk.Button(download_frame, text="Download Results", command=download_selected_jobs, width=20)
-    download_button.grid(row=1, column=1,  padx=5, pady=5, sticky="w")
+    download_button.grid(row=1, column=1,  padx=5, pady=5, sticky="")
 
-    dw_output_label = tk.Label(download_frame, text="")
-    dw_output_label.grid(row=2, column=1, sticky="w", padx=5, pady=5)
+    dw_output_label = tk.Label(download_frame, text="",  wraplength=800, justify="center")
+    dw_output_label.grid(row=2, column=1, sticky="", padx=5, pady=5)
 
     
 
