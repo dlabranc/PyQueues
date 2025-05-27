@@ -1,7 +1,0 @@
-[2025-05-26 15:19:38.976332] Started job 1519_260525_Z5AKC for ansys
-[2025-05-26 15:19:38.976332] Running script: C:\Users\olin_\Documents\Projects\Qubit Designs\Scheduler\results\ansys\1519_260525_Z5AKC\example_script.py
-Ciao sono il tuo script Python
-Hello, I am a resource file
-Ho finito di eseguire
-
-[2025-05-26 15:19:49.111971] Completed job 1519_260525_Z5AKC

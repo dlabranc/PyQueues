@@ -1,7 +1,0 @@
-[2025-05-27 10:42:13.066623] Started job 1042_270525_SSUP3 for ansys
-[2025-05-27 10:42:13.066623] Running script: C:\Users\olin_\Documents\Packages\Scheduler\results\ansys\1042_270525_SSUP3\example_script.py
-Ciao sono il tuo script Python
-Hello, I am a resource file
-Ho finito di eseguire
-
-[2025-05-27 10:42:23.201767] Completed job 1042_270525_SSUP3
