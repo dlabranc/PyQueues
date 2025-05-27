@@ -1,0 +1,7 @@
+[2025-05-26 15:19:28.813196] Started job 1519_260525_56UBS for ansys
+[2025-05-26 15:19:28.813196] Running script: C:\Users\olin_\Documents\Projects\Qubit Designs\Scheduler\results\ansys\1519_260525_56UBS\example_script.py
+Ciao sono il tuo script Python
+Hello, I am a resource file
+Ho finito di eseguire
+
+[2025-05-26 15:19:38.952584] Completed job 1519_260525_56UBS

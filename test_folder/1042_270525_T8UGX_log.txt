@@ -1,0 +1,11 @@
+[2025-05-27 10:42:12.872705] Started job 1042_270525_T8UGX for ansys
+[2025-05-27 10:42:12.872705] Running script: C:\Users\olin_\Documents\Packages\Scheduler\results\ansys\1042_270525_T8UGX\error_test.py
+This script is intentionally incorrect to test error handling.
+
+[stderr]
+Traceback (most recent call last):
+  File "C:\Users\olin_\Documents\Packages\Scheduler\results\ansys\1042_270525_T8UGX\error_test.py", line 4, in <module>
+    pdnr("This line will cause an error because 'pdnr' is not defined.")
+NameError: name 'pdnr' is not defined
+
+[2025-05-27 10:42:13.017434] Error in job 1042_270525_T8UGX

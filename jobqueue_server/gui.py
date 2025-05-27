@@ -224,7 +224,7 @@ def run_gui():
     # Dropdown for status filter
     tk.Label(table_frame, text="Status:").grid(row=0, column=1, sticky="w", padx=5, pady=(5, 2))
     status_var = tk.StringVar(value="all")
-    status_dropdown = ttk.Combobox(table_frame, textvariable=status_var, values=["all", "queued", "running", "completed", "interrupted", "never started"], state="readonly")
+    status_dropdown = ttk.Combobox(table_frame, textvariable=status_var, values=["all", "completed", "running", "queued", "interrupted", "never started", "failed"], state="readonly")
     status_dropdown.grid(row=0, column=1, sticky="w", padx=50, pady=(5, 2))
 
     # Dropdown for queue filter
@@ -275,18 +275,13 @@ def run_gui():
     # Download #
     ############
 
-    download_frame = tk.Frame(root, width=1000, height=100)
-    download_frame.grid(row=12, column=0, columnspan=2, sticky="nsew", padx=10, pady=(0, 0))
-    download_frame.columnconfigure(0, weight=1)
-    download_frame.rowconfigure(0, weight=1)
-    download_frame.rowconfigure(1, weight=1)
-    download_frame.rowconfigure(2, weight=1)
-    download_frame.grid_propagate(False)  # Prevent frame from resizing to fit content
-
     def download_selected_jobs():
+        download_display.delete("1.0", tk.END) 
+
         selected_items = table.selection()
         if not selected_items:
             print("No jobs selected.")
+            download_display.insert(tk.END, 'No Jobs Selected')
             return
 
         # Ask for folder to save results
@@ -297,6 +292,7 @@ def run_gui():
                 return  # user canceled
 
         count = 0
+        
         for item_id in selected_items:
             row = table.item(item_id)["values"]
             job_id = row[0]  # adjust index to match JobID column
@@ -304,45 +300,78 @@ def run_gui():
             download_job_log(job_id, save_as=filename, server_url=f"http://{ip_entry.get()}:{port_entry.get()}")
             if row[2] != "completed":
                 print(f"Job {job_id} is not completed. Skipping download.")
+                download_display.insert(tk.END, f"{job_id} : Download failed!\n", "fail")
                 continue
             count += 1
             filename = f"{folder}/{job_id}_results.zip"
             download_job_results(job_id, save_as=filename)
+            download_display.insert(tk.END, f"{job_id} : Download successfull!\n", "success")
 
-        print(f"Downloaded {count}/{len(selected_items)} jobs to {folder}")
-        dw_output_label.config(text=f"Downloaded {count}/{len(selected_items)} jobs to {folder}")
+        print(f"Downloaded {count}/{len(selected_items)} job(s) to {folder}")
+        download_display.insert(tk.END, f"Downloaded {count}/{len(selected_items)} job(s) to {folder}\n")
+        download_display.tag_configure("fail", foreground="red")
+        download_display.tag_configure("success", foreground="green")
 
-        
-    tk.Label(download_frame, text="Select Job(s) from above and Download Results").grid(row=0, column=1, sticky="", padx=5, pady=5)
+
+
+    root.rowconfigure(12, weight=1)
+
+    # === Download Frame ===
+    download_frame = tk.Frame(root, width=500, height=550)
+    download_frame.grid(row=12, column=0, columnspan=2, sticky="nsew", padx=10, pady=0)
+    download_frame.columnconfigure(0, weight=1)
+    download_frame.columnconfigure(1, weight=1)  # Needed for right-aligned text box
+    download_frame.rowconfigure(0, weight=0)
+    download_frame.rowconfigure(1, weight=0)
+    download_frame.rowconfigure(2, weight=0)
+    download_frame.rowconfigure(3, weight=1)  # For the text box
+
+    # === Download instruction label ===
+    tk.Label(download_frame, text="Select Job(s) from above and Download Results").grid(
+        row=0, column=0, columnspan=1, sticky="w", padx=10, pady=5
+    )
+
+    # === Download Button ===
     download_button = tk.Button(download_frame, text="Download Results", command=download_selected_jobs, width=20)
-    download_button.grid(row=1, column=1,  padx=5, pady=5, sticky="")
+    download_button.grid(row=0, column=0, sticky="e", padx=300, pady=5)
 
-    dw_output_label = tk.Label(download_frame, text="",  wraplength=800, justify="center")
-    dw_output_label.grid(row=2, column=1, sticky="", padx=5, pady=5)
-
-    
-
-    tk.Label(download_frame, text="Download Folder:").grid(row=0, column=0, sticky="w", padx=5, pady=5)
+    # === Folder Label and Entry ===
+    tk.Label(download_frame, text="Download Folder:").grid(row=1, column=0, sticky="w", padx=10, pady=5)
     work_folder_var = tk.StringVar()
     work_folder_entry = tk.Entry(download_frame, textvariable=work_folder_var, width=80)
-    work_folder_entry.grid(row=0, column=0, sticky="w", padx=110, pady=5)
+    work_folder_entry.grid(row=1, column=0, sticky="w", padx=130, pady=5)
 
+    # === Browse Button ===
     def browse_work_folder():
         folder = filedialog.askdirectory(title="Select Download Folder")
         if folder:
             work_folder_var.set(folder)
 
     browse_button = tk.Button(download_frame, text="Browse", command=browse_work_folder, width=20)
-    browse_button.grid(row=1, column=0, padx=110, pady=5, sticky="w")
+    browse_button.grid(row=2, column=0, sticky="w", padx=130, pady=5)
 
-    # def periodic_update():
-    #     try:
-    #         update_table()
-    #     except Exception as e:
-    #         print(f"Error updating table: {e}")
-    #     root.after(2000, periodic_update)
+    # === Text Frame for Download Log ===
+    MAX_HEIGHT = 200  # pixels
+    download_text_frame = tk.Frame(download_frame, height=MAX_HEIGHT, width=700)
+    download_text_frame.grid(row=0, column=1, rowspan=4, sticky="nsew", padx=10, pady=5)
+    download_text_frame.grid_propagate(False)  # Prevent expansion beyond fixed size
+    download_text_frame.columnconfigure(0, weight=1)
+    download_text_frame.rowconfigure(0, weight=1)
 
-    # root.after(2000, periodic_update)
+    # === Text Widget ===
+    download_display = tk.Text(download_text_frame, wrap="none")
+    download_display.grid(row=0, column=0, sticky="nsew")
+
+    # === Scrollbars ===
+    scrollbar_y = tk.Scrollbar(download_text_frame, orient="vertical", command=download_display.yview)
+    scrollbar_y.grid(row=0, column=1, sticky="ns")
+
+    scrollbar_x = tk.Scrollbar(download_text_frame, orient="horizontal", command=download_display.xview)
+    scrollbar_x.grid(row=1, column=0, sticky="ew")
+
+    download_display.config(yscrollcommand=scrollbar_y.set, xscrollcommand=scrollbar_x.set)
+    # dw_output_label = tk.Text(download_frame, text="",  wraplength=800, justify="left")
+    # dw_output_label.grid(row=2, column=1, columnspan=2, sticky="w", padx=5, pady=5)
 
     root.mainloop()
 
