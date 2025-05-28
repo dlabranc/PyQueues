@@ -22,15 +22,13 @@ def submit_job(script_path, queue_name, resources=None, user_id=USER_ID, server_
     if resources is None:
         # Recursively gather all files excluding the script
         resources = []
-        for root, _, filenames in os.walk(script_dir):
-            for f in filenames:
-                full_path = os.path.join(root, f)
-                if os.path.abspath(full_path) != os.path.abspath(script_path):
-                    resources.append(full_path)
+        # for root, _, filenames in os.walk(script_dir):
+        #     for f in filenames:
+        #         full_path = os.path.abspath(os.path.join(root, f))
+        #         resources.append(full_path)
     elif isinstance(resources, str):
         resources = [resources]
 
-    print(resources)
     # Attach each resource with its relative path
     for res_path in resources:
         rel_path = os.path.relpath(res_path, start=script_dir)

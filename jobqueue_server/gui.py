@@ -128,13 +128,41 @@ def run_gui():
     additional_files = []  # List to hold additional files selected by the user
     # === Functions ===
     def update_display():
+        nonlocal additional_files, script_paths
         file_display.delete("1.0", tk.END) 
         for script in script_paths:
-            file_display.insert("end", f"[SCRIPT] {script}\n", "script")
-        for f in additional_files:
-            file_display.insert(tk.END, f"[SUPPORT FILE] {f}\n")
-        file_display.tag_configure("script", foreground="red")
+            file_display.insert(tk.END, f"[SCRIPT] {script}\n", "script")
 
+        additional_files = list(set(additional_files))  # Remove duplicates
+
+        for f in additional_files:
+            file_display.insert(tk.END, f"[FILE] {f}\n", "file")
+        
+        file_display.tag_configure("script", foreground="red")
+        file_display.tag_configure("file", foreground="black")
+
+    # Function to select all files in the script folder
+    def select_all_files():
+        nonlocal additional_files, script_paths
+        
+        # Recursively walk through the script folder
+        if not script_paths:
+            file_display.insert(tk.END, "No scripts selected. Please select scripts first.\n")
+            return
+        for root, dirs, files in os.walk(os.path.dirname(script_paths[0])):
+            for file in files:
+                full_path = os.path.abspath(os.path.join(root, file))
+                if full_path in script_paths:
+                    continue
+                additional_files.append(full_path)
+        file_display.insert(tk.END, "Using all files in script path.\n")
+
+        for i,f in enumerate(additional_files):
+            additional_files[i] = os.path.normpath(f)  # Normalizes paths
+
+        update_display()
+
+    # Select scripts
     def select_scripts():
         nonlocal script_paths
         files = filedialog.askopenfilenames(
@@ -143,17 +171,25 @@ def run_gui():
         )
         if files:
             script_paths = list(files)
-            update_display()
-        return
-    def select_files():
-        files = filedialog.askopenfilenames(title="Select Files")
-        if files:
-            additional_files.extend(files)
-            list(set(additional_files))  # Remove duplicates
+            for i,f in enumerate(script_paths):
+                script_paths[i] = os.path.normpath(f)  # Normalizes paths
             update_display()
         return
     
+    # Select additional files
+    def select_files():
+        nonlocal additional_files
+        files = filedialog.askopenfilenames(title="Select Files")
+        if files:
+            additional_files.extend(files)
+            for i,f in enumerate(additional_files):
+                additional_files[i] = os.path.normpath(f)  # Normalizes paths
+            update_display()
+        return
+    
+    # Select a folder and recursively add all files
     def select_folder():
+        nonlocal additional_files
         folder = filedialog.askdirectory(title="Select Folder")
         if folder:
             # Recursively walk through the folder
@@ -161,13 +197,23 @@ def run_gui():
                 for file in files:
                     full_path = os.path.abspath(os.path.join(root, file))
                     additional_files.append(full_path)
+            for i,f in enumerate(additional_files):
+                additional_files[i] = os.path.normpath(f)  # Normalizes paths
             update_display()
         return
+    
+    def reset_files():
+        nonlocal script_paths, additional_files
+        script_paths = []
+        additional_files = []
+        file_display.delete("1.0", tk.END)
 
     # === Buttons ===
     tk.Button(root, text="Select Scripts", command=select_scripts).grid(row=0, column=1, sticky="w", padx=10, pady=5)
     tk.Button(root, text="Select Files", command=select_files).grid(row=0, column=1, sticky="w", padx=100, pady=5)
     tk.Button(root, text="Select Folder", command=select_folder).grid(row=0, column=1, sticky="w", padx=180, pady=5)
+    tk.Button(root, text="Select All Files", command=select_all_files).grid(row=0, column=1, sticky="w", padx=270, pady=5)
+    tk.Button(root, text="Reset All Files", command=reset_files).grid(row=0, column=1, sticky="w", padx=370, pady=5)
 
 
     # === RUN Button and Output ===
