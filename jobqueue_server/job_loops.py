@@ -2,7 +2,7 @@ import os
 import threading
 from .job_db import update_status, get_job_status
 from .queues import queues
-from .config import JOB_FOLDER, RESULT_FOLDER
+from .config import JOB_FOLDER, RESULT_FOLDER, JOB_TIMEOUT
 from datetime import datetime
 import subprocess
 
@@ -41,7 +41,7 @@ def process_job(job):
                     capture_output=True,
                     text=True,
                     cwd=result_dir,
-                    timeout=300  # Optional timeout in seconds
+                    timeout=JOB_TIMEOUT  # Optional timeout in seconds
                 )
                 f.write(result.stdout)
                 if result.stderr:
