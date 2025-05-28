@@ -284,7 +284,7 @@ def run_gui():
     # Dropdown for status filter
     tk.Label(table_frame, text="Status:").grid(row=0, column=1, sticky="w", padx=5, pady=(5, 2))
     status_var = tk.StringVar(value="all")
-    status_dropdown = ttk.Combobox(table_frame, textvariable=status_var, values=["all", "completed", "running", "queued", "interrupted", "never started", "failed"], state="readonly")
+    status_dropdown = ttk.Combobox(table_frame, textvariable=status_var, values=["all", "completed", "running", "queued", "interrupted", "never started", "failed", "cancelled"], state="readonly")
     status_dropdown.grid(row=0, column=1, sticky="w", padx=50, pady=(5, 2))
 
     # Dropdown for queue filter
@@ -301,6 +301,7 @@ def run_gui():
     table.tag_configure("interrupted", background="#ec5f5f")     # light red
     table.tag_configure("never started", background="#ec5f5f")     # light red
     table.tag_configure("failed", background="#ec5f5f")     # light red
+    table.tag_configure("cancelled", background="#ec5f5f")     # light red
     for col in columns:
         table.heading(col, text=col)
         if col == 'created_at' or col == 'updated_at':
@@ -362,10 +363,13 @@ def run_gui():
                 print(f"Job {job_id} is not completed. Skipping download.")
                 download_display.insert(tk.END, f"{job_id} : Download failed!\n", "fail")
                 continue
-            count += 1
             filename = f"{folder}/{job_id}_results.zip"
-            download_job_results(job_id, save_as=filename)
-            download_display.insert(tk.END, f"{job_id} : Download successfull!\n", "success")
+            request_status = download_job_results(job_id, save_as=filename)
+            if request_status == 200:
+                download_display.insert(tk.END, f"{job_id} : Download successfull!\n", "success")
+                count += 1
+            else:
+                download_display.insert(tk.END, f"{job_id} : Download failed!\n", "success")
 
         print(f"Downloaded {count}/{len(selected_items)} job(s) to {folder}")
         download_display.insert(tk.END, f"Downloaded {count}/{len(selected_items)} job(s) to {folder}\n")
@@ -377,7 +381,7 @@ def run_gui():
     root.rowconfigure(12, weight=1)
 
     # === Download Frame ===
-    download_frame = tk.Frame(root, width=500, height=550)
+    download_frame = tk.Frame(root, width=1000, height=550)
     download_frame.grid(row=12, column=0, columnspan=2, sticky="nsew", padx=10, pady=0)
     download_frame.columnconfigure(0, weight=1)
     download_frame.columnconfigure(1, weight=1)  # Needed for right-aligned text box
@@ -387,19 +391,20 @@ def run_gui():
     download_frame.rowconfigure(3, weight=1)  # For the text box
 
     # === Download instruction label ===
-    tk.Label(download_frame, text="Select Job(s) from above and Download Results").grid(
-        row=0, column=0, columnspan=1, sticky="w", padx=10, pady=5
+    tk.Label(download_frame, text="Select Job(s)\nfrom above list", justify='left').grid(
+        row=0, column=0, columnspan=1, sticky="w", padx=5, pady=5
     )
 
+
     # === Download Button ===
-    download_button = tk.Button(download_frame, text="Download Results", command=download_selected_jobs, width=20)
-    download_button.grid(row=0, column=0, sticky="e", padx=300, pady=5)
+    download_button = tk.Button(download_frame, text="Download Job(s) Results", command=download_selected_jobs, width=20, height=2)
+    download_button.grid(row=0, column=0, sticky="w", padx=110, pady=5)
 
     # === Folder Label and Entry ===
-    tk.Label(download_frame, text="Download Folder:").grid(row=1, column=0, sticky="w", padx=10, pady=5)
+    tk.Label(download_frame, text="Download Folder:").grid(row=1, column=0, sticky="w", padx=5, pady=5)
     work_folder_var = tk.StringVar()
     work_folder_entry = tk.Entry(download_frame, textvariable=work_folder_var, width=80)
-    work_folder_entry.grid(row=1, column=0, sticky="w", padx=130, pady=5)
+    work_folder_entry.grid(row=1, column=0, sticky="w", padx=110, pady=5)
 
     # === Browse Button ===
     def browse_work_folder():
@@ -408,7 +413,7 @@ def run_gui():
             work_folder_var.set(folder)
 
     browse_button = tk.Button(download_frame, text="Browse", command=browse_work_folder, width=20)
-    browse_button.grid(row=2, column=0, sticky="w", padx=130, pady=5)
+    browse_button.grid(row=2, column=0, sticky="w", padx=110, pady=5)
 
     # === Text Frame for Download Log ===
     MAX_HEIGHT = 200  # pixels
