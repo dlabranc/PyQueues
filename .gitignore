@@ -4,6 +4,6 @@ env-scheduler/
 build/
 results/*
 jobs/*
-job-db/*
+job_db/*
 *.zip
 *log.txt
