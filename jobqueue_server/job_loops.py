@@ -51,6 +51,8 @@ def process_job(job):
                 else:
                     f.write(f"\n[{datetime.now()}] Completed job {job_id}\n")
                     update_status(job_id, "completed")
+            elif script_path.endswith(".bat"):
+                raise("Not Implemented Yet")
             else:
                 f.write(f"\n[{datetime.now()}] Unknown script type for job {job_id}. Skipping execution\n")
                 update_status(job_id, "failed")
