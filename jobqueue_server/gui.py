@@ -125,6 +125,7 @@ def run_gui():
     # === Text styling tag ===
     file_display.tag_configure("script", foreground="red")
 
+    additional_files = []  # List to hold additional files selected by the user
     # === Functions ===
     def update_display():
         file_display.delete("1.0", tk.END) 
@@ -137,23 +138,36 @@ def run_gui():
     def select_scripts():
         nonlocal script_paths
         files = filedialog.askopenfilenames(
-            title="Select scripts",
+            title="Select Scripts",
             filetypes=[("Python files", "*.py"), ("All files", "*.*")]
         )
         if files:
             script_paths = list(files)
             update_display()
-
+        return
     def select_files():
-        files = filedialog.askopenfilenames(title="Select additional files")
-        nonlocal additional_files
-        additional_files = files
-        update_display()
-
+        files = filedialog.askopenfilenames(title="Select Files")
+        if files:
+            additional_files.extend(files)
+            list(set(additional_files))  # Remove duplicates
+            update_display()
+        return
+    
+    def select_folder():
+        folder = filedialog.askdirectory(title="Select Folder")
+        if folder:
+            # Recursively walk through the folder
+            for root, dirs, files in os.walk(folder):
+                for file in files:
+                    full_path = os.path.abspath(os.path.join(root, file))
+                    additional_files.append(full_path)
+            update_display()
+        return
 
     # === Buttons ===
     tk.Button(root, text="Select Scripts", command=select_scripts).grid(row=0, column=1, sticky="w", padx=10, pady=5)
-    tk.Button(root, text="Select Additional Files", command=select_files).grid(row=0, column=1, sticky="w", padx=100, pady=5)
+    tk.Button(root, text="Select Files", command=select_files).grid(row=0, column=1, sticky="w", padx=100, pady=5)
+    tk.Button(root, text="Select Folder", command=select_folder).grid(row=0, column=1, sticky="w", padx=180, pady=5)
 
 
     # === RUN Button and Output ===

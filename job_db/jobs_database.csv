@@ -1,1 +1,6 @@
 ,job_id,user_id,queue_name,script_path,status,created_at,updated_at
+0,250528_1041_RYIJW,labranca,ansys,C:\Users\olin_\Documents\Packages\Scheduler\results\ansys\250528_1041_RYIJW\example_script.py,completed,2025-05-28 10:41:56,2025-05-28 10:42:06
+1,250528_1045_RP30V,labranca,ansys,C:\Users\olin_\Documents\Packages\Scheduler\results\ansys\250528_1045_RP30V\example_script.py,failed,2025-05-28 10:45:58,2025-05-28 10:46:09
+2,250528_1046_UIS6G,labranca,ansys,C:\Users\olin_\Documents\Packages\Scheduler\results\ansys\250528_1046_UIS6G\example_script.py,failed,2025-05-28 10:46:46,2025-05-28 10:46:56
+3,250528_1049_3VKYX,labranca,ansys,C:\Users\olin_\Documents\Packages\Scheduler\results\ansys\250528_1049_3VKYX\example_script.py,completed,2025-05-28 10:49:04,2025-05-28 10:49:14
+4,250528_1052_HBTPU,labranca,ansys,C:\Users\olin_\Documents\Packages\Scheduler\results\ansys\250528_1052_HBTPU\example_script.py,completed,2025-05-28 10:52:07,2025-05-28 10:52:17

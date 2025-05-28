@@ -1,0 +1,1 @@
+Hello, I am a resource 1 file in resource_folder

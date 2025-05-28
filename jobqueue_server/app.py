@@ -38,10 +38,15 @@ def submit():
     script_path = os.path.join(result_dir, script_file.filename)
     script_file.save(script_path)
 
-    # Save resources in result_dir
+    # # Save resources in result_dir
+    # for file in resources:
+    #     res_path = os.path.join(result_dir, file.filename)
+    #     file.save(res_path)
     for file in resources:
-        res_path = os.path.join(result_dir, file.filename)
-        file.save(res_path)
+        rel_path = file.filename
+        full_path = os.path.join(result_dir, rel_path)
+        os.makedirs(os.path.dirname(full_path), exist_ok=True)
+        file.save(full_path)
 
 
     # Save the job information to the database

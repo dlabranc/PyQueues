@@ -14,25 +14,28 @@ def submit_job(script_path, queue_name, resources=None, user_id=USER_ID, server_
     # Open the main script file
     files = [("script", open(script_path, "rb"))]
 
-    # Check if resources are provided
+    script_dir = os.path.dirname(script_path)
+    if script_dir == "":
+        script_dir = os.getcwd()
+
+
     if resources is None:
-        folder = os.path.dirname(script_path)
-        if folder == "":
-            folder = os.getcwd()
-        print('Folder:', folder)
-        resources = [
-            os.path.join(folder, f)
-            for f in os.listdir(folder)
-            if os.path.isfile(os.path.join(folder, f)) and os.path.join(folder, f) != script_path
-        ]
+        # Recursively gather all files excluding the script
+        resources = []
+        for root, _, filenames in os.walk(script_dir):
+            for f in filenames:
+                full_path = os.path.join(root, f)
+                if os.path.abspath(full_path) != os.path.abspath(script_path):
+                    resources.append(full_path)
     elif isinstance(resources, str):
         resources = [resources]
 
-    
-    # Add each additional resource file
+    print(resources)
+    # Attach each resource with its relative path
     for res_path in resources:
-        res_name = os.path.basename(res_path)
-        files.append(("resources", (res_name, open(res_path, "rb"))))
+        rel_path = os.path.relpath(res_path, start=script_dir)
+        with open(res_path, "rb") as f:
+            files.append(("resources", (rel_path, f.read())))
     
     # Send the request to the server
     data = {"queue_name": queue_name, "user_id": user_id}
