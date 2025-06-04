@@ -364,7 +364,7 @@ def run_gui():
                 download_display.insert(tk.END, f"{job_id} : Download failed!\n", "fail")
                 continue
             filename = f"{folder}/{job_id}_results.zip"
-            request_status = download_job_results(job_id, save_as=filename)
+            request_status = download_job_results(job_id, save_as=filename, server_url=f"http://{ip_entry.get()}:{port_entry.get()}")
             if request_status == 200:
                 download_display.insert(tk.END, f"{job_id} : Download successfull!\n", "success")
                 count += 1
