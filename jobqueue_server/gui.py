@@ -369,7 +369,7 @@ def run_gui():
                 download_display.insert(tk.END, f"{job_id} : Download successfull!\n", "success")
                 count += 1
             else:
-                download_display.insert(tk.END, f"{job_id} : Download failed!\n", "success")
+                download_display.insert(tk.END, f"{job_id} : Download failed!\n", "fail")
 
         print(f"Downloaded {count}/{len(selected_items)} job(s) to {folder}")
         download_display.insert(tk.END, f"Downloaded {count}/{len(selected_items)} job(s) to {folder}\n")

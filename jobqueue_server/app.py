@@ -112,7 +112,7 @@ def download_result_folder(job_id):
         mimetype="application/zip",
         as_attachment=True,
         download_name=f"{job_id}_{queue_name}_results.zip"
-    )
+    ), 200
 
 # Gets the jobs of a specific user - Tested and working
 @app.route("/status_user/<user_id>")
