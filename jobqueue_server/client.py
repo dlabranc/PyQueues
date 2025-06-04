@@ -80,6 +80,8 @@ def download_job_log(job_id, save_as=None, server_url=SERVER_URL):
     else:
         print("Error:", r.status_code, r.text)
 
+    return r.status_code
+
 def download_job_results(job_id, save_as=None, server_url=SERVER_URL):
     if save_as is None:
         save_as = f"{job_id}_results.zip"
@@ -90,3 +92,5 @@ def download_job_results(job_id, save_as=None, server_url=SERVER_URL):
         print(f"✅ Downloaded output to: {save_as}")
     else:
         print("Error:", r.status_code, r.text)
+    
+    return r.status_code
