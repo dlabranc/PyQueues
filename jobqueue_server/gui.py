@@ -33,8 +33,8 @@ def run_gui():
             return
 
         for script in script_paths:
-            if not script.endswith('.py'):
-                output_label.config(text=f"Error: {script} is not a Python script.")
+            if (not (script.endswith('.py')) and not(script.endswith('.bat'))):
+                output_label.config(text=f"Error: {script} is not a Python or Batch script.")
                 continue
             submit_job(script, queue_name, additional_files, user_id=user, server_url=f"http://{ip}:{port}")
             time.sleep(0.1)  # Small delay to ensure the job is processed
@@ -167,7 +167,7 @@ def run_gui():
         nonlocal script_paths
         files = filedialog.askopenfilenames(
             title="Select Scripts",
-            filetypes=[("Python files", "*.py"), ("All files", "*.*")]
+            filetypes=[("Python files", "*.py"), ("Batch files", "*.bat"), ("All files", "*.*")]
         )
         if files:
             script_paths = list(files)

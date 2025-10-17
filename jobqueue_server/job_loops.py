@@ -6,6 +6,28 @@ from .config import JOB_FOLDER, RESULT_FOLDER, JOB_TIMEOUT
 from datetime import datetime
 import subprocess
 
+
+def run_and_log(cmd, result_dir, job_id, f, timeout):
+    result = subprocess.run(
+        cmd,
+        capture_output=True,
+        text=True,
+        cwd=result_dir,
+        timeout=timeout
+    )
+    if result.stdout:
+        f.write(result.stdout)
+    if result.stderr:
+        f.write("\n[stderr]\n" + result.stderr)
+
+    if result.returncode == 0:
+        f.write(f"\n[{datetime.now()}] Completed job {job_id}\n")
+        update_status(job_id, "completed")
+    else:
+        f.write(f"\n[{datetime.now()}] Error in job {job_id} (exit {result.returncode})\n")
+        update_status(job_id, "failed")
+
+
 # job_status = load_status()
 # job_queues = load_queues()
 def process_job(job):
@@ -36,23 +58,30 @@ def process_job(job):
 
             # Run job script
             if script_path.endswith(".py"):
-                result = subprocess.run(
+                run_and_log(
                     ["python", script_path],
-                    capture_output=True,
-                    text=True,
-                    cwd=result_dir,
-                    timeout=JOB_TIMEOUT  # Optional timeout in seconds
+                    result_dir, job_id, f, JOB_TIMEOUT
                 )
-                f.write(result.stdout)
-                if result.stderr:
-                    f.write(f"\n[stderr]\n{result.stderr}")
-                    f.write(f"\n[{datetime.now()}] Error in job {job_id}\n")
-                    update_status(job_id, "failed")
-                else:
-                    f.write(f"\n[{datetime.now()}] Completed job {job_id}\n")
-                    update_status(job_id, "completed")
+                # result = subprocess.run(
+                #     ["python", script_path],
+                #     capture_output=True,
+                #     text=True,
+                #     cwd=result_dir,
+                #     timeout=JOB_TIMEOUT  # Optional timeout in seconds
+                # )
+                # f.write(result.stdout)
+                # if result.stderr:
+                #     f.write(f"\n[stderr]\n{result.stderr}")
+                #     f.write(f"\n[{datetime.now()}] Error in job {job_id}\n")
+                #     update_status(job_id, "failed")
+                # else:
+                #     f.write(f"\n[{datetime.now()}] Completed job {job_id}\n")
+                #     update_status(job_id, "completed")
             elif script_path.endswith(".bat"):
-                raise("Not Yet Implemented")
+                run_and_log(
+                    ["cmd.exe", "/c", script_path],
+                    result_dir, job_id, f, JOB_TIMEOUT
+                )
             else:
                 f.write(f"\n[{datetime.now()}] Unknown script type for job {job_id}. Skipping execution\n")
                 update_status(job_id, "failed")
