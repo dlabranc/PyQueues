@@ -7,3 +7,4 @@ RESULT_FOLDER = os.path.join(BASE_DIR, "results")
 DB_FOLDER = os.path.join(BASE_DIR, "job_db")
 SOFTWARE_QUEUES = ["ansys", "palace"]
 JOB_TIMEOUT = 300
+JOB_TIMESLEEP = 5

@@ -2,9 +2,10 @@ import os
 import threading
 from .job_db import update_status, get_job_status
 from .queues import queues
-from .config import JOB_FOLDER, RESULT_FOLDER, JOB_TIMEOUT
+from .config import JOB_FOLDER, RESULT_FOLDER, JOB_TIMEOUT, JOB_TIMESLEEP
 from datetime import datetime
 import subprocess
+import time
 
 
 def run_and_log(cmd, result_dir, job_id, f, timeout):
@@ -31,6 +32,7 @@ def run_and_log(cmd, result_dir, job_id, f, timeout):
 # job_status = load_status()
 # job_queues = load_queues()
 def process_job(job):
+    time.sleep(JOB_TIMESLEEP)
     print(f"{datetime.now()} - Processing job: {job['job_id']}")
     job_id = job["job_id"]
     script_path = job["script_path"]

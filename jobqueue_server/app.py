@@ -5,7 +5,7 @@ import os
 from .utils import *
 from .queues import queues
 from .job_loops import start_queue_loops
-from .config import JOB_FOLDER, RESULT_FOLDER
+from .config import JOB_FOLDER, RESULT_FOLDER, SOFTWARE_QUEUES
 from .job_db import add_job, get_user_jobs, update_status, get_job_queue_name, get_job_status, load_db, at_server_start
 from datetime import datetime
 from collections import OrderedDict
@@ -135,6 +135,11 @@ def status_job(job_id):
 def status_all():
     jobs = load_db()
     return jsonify(jobs.to_dict()), 200
+
+# Gets Server configurated queues
+@app.route("/config/queues")
+def get_queues():
+    return jsonify({"queues": SOFTWARE_QUEUES}), 200
 
 # Starts the queues at server start - Tested and working
 def run():

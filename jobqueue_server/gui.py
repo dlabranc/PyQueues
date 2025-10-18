@@ -1,7 +1,6 @@
 import tkinter as tk
 from tkinter import filedialog, ttk
 import getpass
-from .config import SOFTWARE_QUEUES
 from .client_config import IP, PORT
 from .client import *
 import pandas as pd
@@ -9,16 +8,25 @@ import time
 
 USER_ID = getpass.getuser()
 
+
+
 def submission_and_update(ip, port, user, queue_name):
 
     return f"Submitted job to {ip}:{port} as {user} in queue {queue_name}"
 
 def run_gui():
+    SOFTWARE_QUEUES = get_config_queues(server_url=f"http://{IP}:{PORT}")
+    if SOFTWARE_QUEUES == []:
+        raise ValueError('No Configured Queue on Server')
     def process_inputs():
         ip = ip_entry.get()
         port = port_entry.get()
         user = user_entry.get()
         queue_name = dropdown_var.get()
+        SOFTWARE_QUEUES = get_config_queues(server_url=f"http://{ip}:{port}")
+
+        
+
         
 
         if not ip or not port or not user:
@@ -167,7 +175,7 @@ def run_gui():
         nonlocal script_paths
         files = filedialog.askopenfilenames(
             title="Select Scripts",
-            filetypes=[("Batch files", "*.bat"), ("All files", "*.*"), ("Python files", "*.py")]
+            filetypes=[("All files", "*.*"),("Batch files", "*.bat"),("Python files", "*.py")]
         )
         if files:
             script_paths = list(files)

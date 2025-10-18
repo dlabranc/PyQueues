@@ -82,6 +82,14 @@ def download_job_log(job_id, save_as=None, server_url=SERVER_URL):
 
     return r.status_code
 
+def get_config_queues(server_url=SERVER_URL):
+    r = requests.get(f"{server_url}/config/queues")
+    if r.status_code == 200:
+        return r.json().get("queues", [])
+    else:
+        print("Error:", r.status_code, r.text)
+        return []
+
 def download_job_results(job_id, save_as=None, server_url=SERVER_URL):
     if save_as is None:
         save_as = f"{job_id}_results.zip"
