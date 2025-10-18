@@ -58,6 +58,7 @@ def process_job(job):
 
             # Run job script
             if script_path.endswith(".py"):
+                print(f"[{datetime.now()}] Running script: {script_path}\n")
                 run_and_log(
                     ["python", script_path],
                     result_dir, job_id, f, JOB_TIMEOUT
@@ -78,6 +79,7 @@ def process_job(job):
                 #     f.write(f"\n[{datetime.now()}] Completed job {job_id}\n")
                 #     update_status(job_id, "completed")
             elif script_path.endswith(".bat"):
+                print(f"[{datetime.now()}] Running script: {script_path}\n")
                 run_and_log(
                     ["cmd.exe", "/c", script_path],
                     result_dir, job_id, f, JOB_TIMEOUT

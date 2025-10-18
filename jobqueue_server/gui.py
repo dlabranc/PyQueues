@@ -167,7 +167,7 @@ def run_gui():
         nonlocal script_paths
         files = filedialog.askopenfilenames(
             title="Select Scripts",
-            filetypes=[("Python files", "*.py"), ("Batch files", "*.bat"), ("All files", "*.*")]
+            filetypes=[("Batch files", "*.bat"), ("All files", "*.*"), ("Python files", "*.py")]
         )
         if files:
             script_paths = list(files)
