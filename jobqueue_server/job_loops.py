@@ -1,4 +1,5 @@
 import os
+import sys
 import threading
 from .job_db import update_status, get_job_status
 from .queues import queues
@@ -62,7 +63,7 @@ def process_job(job):
             if script_path.endswith(".py"):
                 print(f"[{datetime.now()}] Running script: {script_path}\n")
                 run_and_log(
-                    ["python", script_path],
+                    [sys.executable, script_path],
                     result_dir, job_id, f, JOB_TIMEOUT
                 )
                 # result = subprocess.run(
